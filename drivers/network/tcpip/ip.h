@@ -12,7 +12,7 @@ public:
     static LPCWSTR DosName;
 
     /* IRP_MJ_* handlers for the Ip device */
-    virtual NTSTATUS Create(_Inout_ PIRP Irp);
+    virtual NTSTATUS CreateControlChannel(_Inout_ PIRP Irp, _Inout_ PIO_STACK_LOCATION IrpSp);
     virtual NTSTATUS Cleanup(_Inout_ PIRP Irp);
     virtual NTSTATUS Close(_Inout_ PIRP Irp);
     virtual NTSTATUS Dispatch(_Inout_ PIRP Irp);

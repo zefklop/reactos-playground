@@ -8,20 +8,13 @@
 #include "tcpip.h"
 
 #include <new>
+#include <string.h>
 
 #define NDEBUG
 #include <debug.h>
 
 /* Global Initializers */
 PDEVICE_OBJECT TcpIpDriver::IpDeviceObject = NULL;
-
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text(PAGE, TcpIpDriver::Create)
-#pragma alloc_text(PAGE, TcpIpDriver::Cleanup)
-#pragma alloc_text(PAGE, TcpIpDriver::Close)
-#pragma alloc_text(PAGE, TcpIpDriver::DispatchInternal)
-#pragma alloc_text(PAGE, TcpIpDriver::Dispatch)
-#endif
 
 _Use_decl_annotations_
 NTAPI
@@ -32,7 +25,7 @@ TcpIpDriver::Unload(
 {
     TCPIP_DEVICE_EXTENSION* TcpIpDevExt;
 
-    /* We must explicitly call the destructor of our device extension classes, because they were not allocated with the calssic 'new' operator */
+    /* We must explicitly call the destructor of our device extension classes, because they were not allocated with the classic 'new' operator */
     TcpIpDevExt = reinterpret_cast<TCPIP_DEVICE_EXTENSION*>(IpDeviceObject->DeviceObjectExtension);
     delete static_cast<IpDevice*>(TcpIpDevExt->DevExt);
     IoDeleteDevice(TcpIpDriver::IpDeviceObject);
@@ -110,8 +103,56 @@ TcpIpDriver::Create(
 {
     TCPIP_DEVICE_EXTENSION* TcpIpDevExt = reinterpret_cast<TCPIP_DEVICE_EXTENSION*>(DevObj->DeviceObjectExtension);
 
+    /* Get the file information */
+    PFILE_FULL_EA_INFORMATION FileInfo = reinterpret_cast<PFILE_FULL_EA_INFORMATION>(Irp->AssociatedIrp.SystemBuffer);
+
+    /* Get the current stack location */
+    PIO_STACK_LOCATION IrpSp = IoGetCurrentIrpStackLocation(Irp);
+
+    if (FileInfo == NULL)
+    {
+        /* Open a control channel file for the targeted device. */
+        return TcpIpDevExt->DevExt->CreateControlChannel(Irp, IrpSp);
+    }
+
+    /* See if we should open an address file or a connection file. */
+    switch (FileInfo->EaNameLength)
+    {
+        case TDI_TRANSPORT_ADDRESS_LENGTH:
+            if (::strncmp(&FileInfo->EaName[0], TdiTransportAddress, TDI_TRANSPORT_ADDRESS_LENGTH) != 0)
+            {
+                /* Bad file name */
+                Irp->IoStatus.Status = STATUS_INVALID_PARAMETER;
+                IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
+                return STATUS_INVALID_PARAMETER;
+            }
+
+            UNIMPLEMENTED
+
+            Irp->IoStatus.Status = STATUS_NOT_IMPLEMENTED;
+            IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
+            return STATUS_NOT_IMPLEMENTED;
+
+        case TDI_CONNECTION_CONTEXT_LENGTH:
+            if (::strncmp(&FileInfo->EaName[0], TdiConnectionContext, TDI_CONNECTION_CONTEXT_LENGTH) != 0)
+            {
+                /* Bad file name */
+                Irp->IoStatus.Status = STATUS_INVALID_PARAMETER;
+                IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
+                return STATUS_INVALID_PARAMETER;
+            }
+
+            UNIMPLEMENTED
+
+            Irp->IoStatus.Status = STATUS_NOT_IMPLEMENTED;
+            IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
+            return STATUS_NOT_IMPLEMENTED;
+    }
+
     /* pass it down to the targeted device */
-    return TcpIpDevExt->DevExt->Create(Irp);
+    Irp->IoStatus.Status = STATUS_INVALID_PARAMETER;
+    IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
+    return STATUS_INVALID_PARAMETER;
 }
 
 _Use_decl_annotations_

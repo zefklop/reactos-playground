@@ -1,5 +1,6 @@
 
 #include <ntddk.h>
+#include <tdikrnl.h>
 
 #include "device.h"
 #include "ip.h"

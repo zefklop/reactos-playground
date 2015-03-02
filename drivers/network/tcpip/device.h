@@ -5,7 +5,7 @@ class TcpIpDevice
 {
 public:
     /* Handlers for IRP_MJ_* requests called for this device */
-    virtual NTSTATUS Create(_Inout_ PIRP Irp) = 0;
+    virtual NTSTATUS CreateControlChannel(_Inout_ PIRP Irp, _Inout_ PIO_STACK_LOCATION IrpSp) = 0;
     virtual NTSTATUS Close(_Inout_ PIRP Irp) = 0;
     virtual NTSTATUS Cleanup(_Inout_ PIRP Irp) = 0;
     virtual NTSTATUS Dispatch(_Inout_ PIRP Irp) = 0;
