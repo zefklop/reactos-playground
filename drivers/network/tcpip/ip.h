@@ -18,6 +18,16 @@ public:
     virtual NTSTATUS Dispatch(_Inout_ PIRP Irp);
     virtual NTSTATUS DispatchInternal(_Inout_ PIRP Irp);
 
+    static void* operator new(size_t Size, void* ptr)
+    {
+        // We don't do anything, the class is allocated into the device extension.
+
+        // sizeof(IpDevice) is the amount of space we allocated. Check this is actually what the runtime needs
+        ASSERT(Size == sizeof(IpDevice));
+
+        return ptr;
+    }
+
     static void operator delete(void* ptr)
     {
         // Nothing to do: the memory is allocated into the device extension

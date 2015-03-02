@@ -7,8 +7,7 @@
 
 #include "tcpip.h"
 
-#include <new>
-#include <string.h>
+#include <cstring>
 
 #define NDEBUG
 #include <debug.h>
