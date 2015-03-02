@@ -32,7 +32,19 @@ NTSTATUS
 IpDevice::Cleanup(
     _Inout_ PIRP Irp)
 {
-    DPRINT1("Ip device: IRP_MJ_CLEANUP\n");
+    DPRINT("Ip device: IRP_MJ_CLEANUP\n");
+
+    PIO_STACK_LOCATION IrpSp = IoGetCurrentIrpStackLocation(Irp);
+
+    if (IrpSp->FileObject->FsContext2 == reinterpret_cast<PVOID>(TDI_CONTROL_CHANNEL_FILE))
+    {
+        /* We don't allocate anything for a control channel file */
+        Irp->IoStatus.Status = STATUS_SUCCESS;
+        IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
+        return STATUS_SUCCESS;
+    }
+
+    UNIMPLEMENTED
 
     Irp->IoStatus.Status = STATUS_NOT_IMPLEMENTED;
     IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
@@ -44,7 +56,19 @@ NTSTATUS
 IpDevice::Close(
     _Inout_ PIRP Irp)
 {
-    DPRINT1("Ip device: IRP_MJ_CLOSE\n");
+    DPRINT("Ip device: IRP_MJ_CLOSE\n");
+
+    PIO_STACK_LOCATION IrpSp = IoGetCurrentIrpStackLocation(Irp);
+
+    if (IrpSp->FileObject->FsContext2 == reinterpret_cast<PVOID>(TDI_CONTROL_CHANNEL_FILE))
+    {
+        /* We don't allocate anything for a control channel file */
+        Irp->IoStatus.Status = STATUS_SUCCESS;
+        IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
+        return STATUS_SUCCESS;
+    }
+
+    UNIMPLEMENTED
 
     Irp->IoStatus.Status = STATUS_NOT_IMPLEMENTED;
     IoCompleteRequest(Irp, IO_NETWORK_INCREMENT);
