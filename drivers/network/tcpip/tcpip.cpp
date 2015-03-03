@@ -79,6 +79,14 @@ DriverEntry(
     IpDevice* IpDev = new((TcpIpDevExt + 1)) IpDevice();
     TcpIpDevExt->DevExt = IpDev;
 
+    /* Initialize NDIS bindings */
+    Status = NdisInterface::Init();
+    if (!NT_SUCCESS(Status))
+    {
+        IoDeleteDevice(TcpIpDriver::IpDeviceObject);
+        return Status;
+    }
+
     /* Register callbacks */
     DriverObject->MajorFunction[IRP_MJ_CREATE] = TcpIpDriver::Create;
     DriverObject->MajorFunction[IRP_MJ_CLOSE] = TcpIpDriver::Close;

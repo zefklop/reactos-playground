@@ -4,6 +4,7 @@
 
 #include "device.h"
 #include "ip.h"
+#include "ndis_interface.h"
 
 class TcpIpDriver
 {
