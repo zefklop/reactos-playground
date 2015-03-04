@@ -2,8 +2,10 @@
 #include <ntddk.h>
 #include <tdikrnl.h>
 
+#include "address_v4.h"
 #include "device.h"
 #include "ip.h"
+#include "loopback.h"
 #include "ndis_interface.h"
 
 class TcpIpDriver
@@ -21,4 +23,7 @@ public:
 
     /* The driver unload callback */
     static DRIVER_UNLOAD Unload;
+
+    /* Get the device extension object from the kernel device object */
+    static IpDevice* GetIpDevice(void);
 };

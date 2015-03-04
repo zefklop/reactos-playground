@@ -26,8 +26,15 @@ TcpIpDriver::Unload(
 
     /* We must explicitly call the destructor of our device extension classes, because they were not allocated with the classic 'new' operator */
     TcpIpDevExt = reinterpret_cast<TCPIP_DEVICE_EXTENSION*>(IpDeviceObject->DeviceObjectExtension);
-    delete static_cast<IpDevice*>(TcpIpDevExt->DevExt);
+    delete TcpIpDevExt->DevExt;
     IoDeleteDevice(TcpIpDriver::IpDeviceObject);
+}
+
+/* Global getters */
+IpDevice* TcpIpDriver::GetIpDevice(void)
+{
+    TCPIP_DEVICE_EXTENSION* TcpIpDevExt = reinterpret_cast<TCPIP_DEVICE_EXTENSION*>(IpDeviceObject->DeviceObjectExtension);
+    return static_cast<IpDevice*>(TcpIpDevExt->DevExt);
 }
 
 
@@ -81,6 +88,14 @@ DriverEntry(
 
     /* Initialize NDIS bindings */
     Status = NdisInterface::Init();
+    if (!NT_SUCCESS(Status))
+    {
+        IoDeleteDevice(TcpIpDriver::IpDeviceObject);
+        return Status;
+    }
+
+    /* "Start" the loopback interface */
+    Status = LoopbackInterface::Init();
     if (!NT_SUCCESS(Status))
     {
         IoDeleteDevice(TcpIpDriver::IpDeviceObject);

@@ -5,6 +5,7 @@ add_definitions(-DNDIS51)
 
 list(APPEND SOURCE
     ip.cpp
+    loopback.cpp
     ndis_interface.cpp
     tcpip.cpp)
 

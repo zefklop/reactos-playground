@@ -13,6 +13,19 @@
 LPCWSTR IpDevice::Name = L"\\Device\\Ip";
 LPCWSTR IpDevice::DosName = L"\\DosDevices\\Ip";
 
+IpDevice::IpDevice()
+{
+    InitializeListHead(&m_InterfaceListHead);
+    KeInitializeSpinLock(&m_InterfaceListLock);
+}
+
+void
+IpDevice::AddInterface(
+    _Inout_ Interface* iFace)
+{
+    ::ExInterlockedInsertTailList(&m_InterfaceListHead, iFace, &m_InterfaceListLock);
+}
+
 // IRP_MJ_CREATE handler
 NTSTATUS
 IpDevice::CreateControlChannel(
